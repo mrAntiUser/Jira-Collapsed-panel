@@ -8,7 +8,7 @@
 // @include      *support.argustelecom.ru*
 // @grant        none
 // @require      https://code.jquery.com/jquery-3.3.1.min.js
-// @run-at       document-end
+// @run-at       document-start
 // ==/UserScript==
 
 
