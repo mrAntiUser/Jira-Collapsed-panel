@@ -9,6 +9,6 @@ Collapsed panel for jira 7
 
 <img src="img\readme.gif" width="500">
 
-## Панели без заголовком
+## Панели без заголовка
 
 <img src="img\readme_none_caption.gif" width="500">
