@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.3
+// @version      1.4
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,9 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.4
+    Добавлена настройка минимального количества строк при которых
+      создается заголовок для панелей без него. default 3
   1.3
     Панели без заголовка теперь тоже умеют сворачиваться
   1.2
@@ -31,6 +34,7 @@
   // null  - auto. Collapse when <maxLines> line or more
   const startCollapsed = null;
   const maxLines = 15;
+  const minLines = 3;
 
   let $obsrvContainer, $panels;
   const observer = new MutationObserver(mutationCallback);
@@ -61,24 +65,28 @@
   function makePanels() {
     $panels.each(function(){
       let $pnlHeader = $(this).find('>div.codeHeader.panelHeader');
-      const isNewHeader = $pnlHeader.length === 0;
+      const $pnlContent = $(this).find('div.codeContent.panelContent');
+      const $preContent = $pnlContent.find('> pre');
+      const contentLinesCount = (($preContent.text() || '').match(/\n/gmi) || []).length;
+
       let $headerTxt;
+      const isNewHeader = $pnlHeader.length === 0;
+      if (isNewHeader && contentLinesCount <= minLines) {return}
       if (isNewHeader){
         $pnlHeader = $(this).prepend(`<div class="codeHeader panelHeader cp-spnl-header">
             <div class="cp-header-img cp-spnl-header-img">»</div><d class="cp-spnl-txt"></d></div>`).find('div.cp-spnl-header');
         $headerTxt = $pnlHeader.find('>d');
       } else{ if ($pnlHeader.hasClass('cp-header')){return} }
-      const $pnlContent = $(this).find('div.codeContent.panelContent');
+      
       $pnlContent.addClass('cp-pnl-content');
-      const $preContent = $pnlContent.find('> pre');
+      $preContent.height($pnlContent.height()).addClass('cp-pre-content');
+      $preContent.resize(function(){$pnlContent.height($preContent.height())});
+
       $pnlHeader.addClass('aui-button cp-header');
       $pnlHeader.find('>b').addClass('cp-header-txt');
       if (!isNewHeader){$pnlHeader.prepend(`<div class="cp-header-img">»</div>`)}
       const $pnlHeaderImg = $pnlHeader.find('div.cp-header-img');
-      $preContent.height($pnlContent.height()).addClass('cp-pre-content');
-      $preContent.resize(function(){$pnlContent.height($preContent.height())});
       $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $preContent, $headerTxt)});
-      const contentLinesCount = (($preContent.text() || '').match(/\n/gmi) || []).length;
       if (isNewHeader && (startCollapsed || contentLinesCount >= maxLines)){$headerTxt.text('  [' + contentLinesCount + ']')}
       if (startCollapsed === null){
         togglePanel($pnlHeaderImg, $preContent, $headerTxt, contentLinesCount >= maxLines);
