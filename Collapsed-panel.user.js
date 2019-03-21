@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.2
+// @version      1.3
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.3
+    Панели без заголовка теперь тоже умеют сворачиваться
   1.2
     баг если панель в описании таска
   1.1
@@ -51,46 +53,65 @@
   }
 
   function observerStart() {
-    $panels = $('div.code.panel:has(div.codeHeader.panelHeader):not(.aui-button)');
+    $panels = $('div.code.panel:not(.aui-button)');
     makePanels();
     observer.observe($obsrvContainer.get(0), {childList: true})
   }
 
   function makePanels() {
     $panels.each(function(){
-      const $pnlHeader = $(this).find('>div.codeHeader.panelHeader');
-      if ($pnlHeader.hasClass('cp-header')){return};
+      let $pnlHeader = $(this).find('>div.codeHeader.panelHeader');
+      const isNewHeader = $pnlHeader.length === 0;
+      let $headerTxt;
+      if (isNewHeader){
+        $pnlHeader = $(this).prepend(`<div class="codeHeader panelHeader cp-spnl-header">
+            <div class="cp-header-img cp-spnl-header-img">»</div><d class="cp-spnl-txt"></d></div>`).find('div.cp-spnl-header');
+        $headerTxt = $pnlHeader.find('>d');
+      } else{ if ($pnlHeader.hasClass('cp-header')){return} }
       const $pnlContent = $(this).find('div.codeContent.panelContent');
       $pnlContent.addClass('cp-pnl-content');
       const $preContent = $pnlContent.find('> pre');
       $pnlHeader.addClass('aui-button cp-header');
-      const $pnlHeaderImg = $pnlHeader.prepend(`<div class="cp-header-img">»</div>`).find('div.cp-header-img');
+      $pnlHeader.find('>b').addClass('cp-header-txt');
+      if (!isNewHeader){$pnlHeader.prepend(`<div class="cp-header-img">»</div>`)}
+      const $pnlHeaderImg = $pnlHeader.find('div.cp-header-img');
       $preContent.height($pnlContent.height()).addClass('cp-pre-content');
       $preContent.resize(function(){$pnlContent.height($preContent.height())});
-      $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $preContent)});
+      $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $preContent, $headerTxt)});
+      const contentLinesCount = (($preContent.text() || '').match(/\n/gmi) || []).length;
+      if (isNewHeader && (startCollapsed || contentLinesCount >= maxLines)){$headerTxt.text('  [' + contentLinesCount + ']')}
       if (startCollapsed === null){
-        togglePanel($pnlHeaderImg, $preContent, (($preContent.text() || '').match(/\n/gmi) || []).length >= maxLines);
+        togglePanel($pnlHeaderImg, $preContent, $headerTxt, contentLinesCount >= maxLines);
       } else {
-        togglePanel($pnlHeaderImg, $preContent, startCollapsed);
+        togglePanel($pnlHeaderImg, $preContent, $headerTxt, startCollapsed);
       }
     });
   }
 
-  function togglePanel($header, $content, collapse) {
+  function togglePanel($header, $content, $headerTxt, collapse) {
     if (collapse === undefined){
       $header.toggleClass('cp-expanded-head cp-collapsed-head');
       $content.toggleClass('cp-expanded-content cp-collapsed-content');
+      if ($headerTxt){$headerTxt.toggleClass('cp-spnl-txt-collapse cp-spnl-txt-expand');}
     } else {
       if (collapse){
         $header.removeClass('cp-expanded-head');
         $content.removeClass('cp-expanded-content');
         $header.addClass('cp-collapsed-head');
         $content.addClass('cp-collapsed-content');
+        if ($headerTxt){
+          $headerTxt.removeClass('cp-spnl-txt-expand');
+          $headerTxt.addClass('cp-spnl-txt-collapse');
+        }
       } else {
         $header.removeClass('cp-collapsed-head');
         $content.removeClass('cp-collapsed-content');
         $header.addClass('cp-expanded-head');
         $content.addClass('cp-expanded-content');
+        if ($headerTxt){
+          $headerTxt.removeClass('cp-spnl-txt-collapse');
+          $headerTxt.addClass('cp-spnl-txt-expand');
+        }
       }
     }
   }
@@ -108,6 +129,10 @@
       .cp-header{
         width: 100%;
         padding: 3px 12px;
+      }
+      .cp-header-txt{
+        top: -2px;
+        position: relative;
       }
       .cp-header-img{
         margin-right: 10px;
@@ -137,6 +162,27 @@
       .cp-collapsed-content{
         height: 0 !important;
         transition: height .3s;
+      }
+      .cp-spnl-header{
+        border-bottom-width: 1px;
+        height: 15px;
+      }
+      .cp-spnl-header-img{
+        top: -8px;
+        position: relative;
+        font-size: 120%;
+      }
+      .cp-spnl-txt{
+        vertical-align: text-top;
+        font-size: 11px;
+        top: -10px;
+        position: relative;
+      }
+      d.cp-spnl-txt-collapse:before {
+        content: "развернуть";
+      }
+      d.cp-spnl-txt-expand:before {
+        content: "свернуть";
       }
     `)
   }
