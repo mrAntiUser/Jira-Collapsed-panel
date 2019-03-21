@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.1
+// @version      1.2
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.2
+    баг если панель в описании таска
   1.1
     Auto collapse when <maxLines> line or more.
       <maxLines> default 15
@@ -65,7 +67,7 @@
       const $pnlHeaderImg = $pnlHeader.prepend(`<div class="cp-header-img">»</div>`).find('div.cp-header-img');
       $preContent.height($pnlContent.height()).addClass('cp-pre-content');
       $preContent.resize(function(){$pnlContent.height($preContent.height())});
-      $pnlHeader.click(function(){togglePanel($pnlHeaderImg, $preContent)});
+      $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $preContent)});
       if (startCollapsed === null){
         togglePanel($pnlHeaderImg, $preContent, (($preContent.text() || '').match(/\n/gmi) || []).length >= maxLines);
       } else {
