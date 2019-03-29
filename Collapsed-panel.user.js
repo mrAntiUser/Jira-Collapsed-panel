@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.4.1
+// @version      1.5
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,9 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.5
+    Теперь так же скрываются и панели, а не только code. Пенель сворачивается с любым контентом, однако
+      панели внутри панелей не делаются сворачиваемыми
   1.4.1
     Добавлен падинг для панелей без заголовка
   1.4
@@ -59,41 +62,47 @@
   }
 
   function observerStart() {
-    $panels = $('div.code.panel:not(.aui-button)');
+    $panels = $('div.panel:not(.aui-button)');
     makePanels();
     observer.observe($obsrvContainer.get(0), {childList: true})
   }
 
   function makePanels() {
     $panels.each(function(){
-      let $pnlHeader = $(this).find('>div.codeHeader.panelHeader');
-      const $pnlContent = $(this).find('div.codeContent.panelContent');
-      const $preContent = $pnlContent.find('> pre');
-      const contentLinesCount = (($preContent.text() || '').match(/\n/gmi) || []).length;
+      let $pnlHeader = $(this).find('>div.panelHeader');
+      const $pnlContent = $(this).find('div.panelContent');
+      if ($pnlContent.length === 0){return}
+      let $pnlBodyContent = $pnlContent.find('> pre');
+      if ($pnlBodyContent.length === 0){
+        $pnlBodyContent = $pnlContent.children().detach();
+        $pnlContent.append($('<div class="cp-content-for-panel"></div>')).find('div.cp-content-for-panel').append($pnlBodyContent);
+      }
+      const contentLinesCount = (($pnlBodyContent.text() || '').match(/\n/gmi) || []).length;
 
+      if ($(this).parents('div.panel').length !== 0){return}
       let $headerTxt;
       const isNewHeader = $pnlHeader.length === 0;
       if (isNewHeader && contentLinesCount <= minLines) {return}
       if (isNewHeader){
-        $pnlHeader = $(this).prepend(`<div class="codeHeader panelHeader cp-spnl-header">
+        $pnlHeader = $(this).prepend(`<div class="panelHeader cp-spnl-header">
             <div class="cp-header-img cp-spnl-header-img">»</div><d class="cp-spnl-txt"></d></div>`).find('div.cp-spnl-header');
         $headerTxt = $pnlHeader.find('>d');
       } else{ if ($pnlHeader.hasClass('cp-header')){return} }
 
       $pnlContent.addClass('cp-pnl-content');
-      $preContent.height($pnlContent.height()).addClass('cp-pre-content');
-      $preContent.resize(function(){$pnlContent.height($preContent.height())});
+      $pnlBodyContent.height($pnlContent.height()).addClass('cp-pre-content');
+      $pnlBodyContent.resize(function(){$pnlContent.height($pnlBodyContent.height())});
 
       $pnlHeader.addClass('aui-button cp-header');
       $pnlHeader.find('>b').addClass('cp-header-txt');
       if (!isNewHeader){$pnlHeader.prepend(`<div class="cp-header-img">»</div>`)}
       const $pnlHeaderImg = $pnlHeader.find('div.cp-header-img');
-      $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $preContent, $headerTxt)});
+      $pnlHeader.click(function(event){event.stopPropagation(); togglePanel($pnlHeaderImg, $pnlBodyContent, $headerTxt)});
       if (isNewHeader && (startCollapsed || contentLinesCount >= maxLines)){$headerTxt.text('  [' + contentLinesCount + ']')}
       if (startCollapsed === null){
-        togglePanel($pnlHeaderImg, $preContent, $headerTxt, contentLinesCount >= maxLines);
+        togglePanel($pnlHeaderImg, $pnlBodyContent, $headerTxt, contentLinesCount >= maxLines);
       } else {
-        togglePanel($pnlHeaderImg, $preContent, $headerTxt, startCollapsed);
+        togglePanel($pnlHeaderImg, $pnlBodyContent, $headerTxt, startCollapsed);
       }
     });
   }
@@ -168,12 +177,14 @@
       }
       .cp-expanded-content{
         padding-bottom: 10px;
-        transition: height .3s;
+        padding-top: 10px;
+        transition: .3s;
       }
       .cp-collapsed-content{
         padding-bottom: 0;
+        padding-top: 0;
         height: 0 !important;
-        transition: height .3s;
+        transition: .3s;
       }
       .cp-spnl-header{
         border-bottom-width: 1px;
