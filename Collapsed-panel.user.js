@@ -66,7 +66,8 @@
   function observerStart() {
     $panels = $('div.panel:not(.aui-button)');
     makePanels();
-    observer.observe($('div.aui-item.issue-main-column').get(0), {childList: true})
+    observer.observe($('div.aui-item.issue-main-column').get(0), {childList: true});
+    observer.observe($('div#activitymodule div.mod-content div#issue_actions_container').get(0), {childList: true});
   }
 
   function makePanels() {
