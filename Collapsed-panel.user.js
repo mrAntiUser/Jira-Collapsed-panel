@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.5.1
+// @version      1.5.2
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,8 +12,9 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
-  1.5.1
+  1.5.2
     Правки стилей. Выравнивание элементов
+    Применить скрипт после редактирования элементов
   1.5
     Теперь так же скрываются и панели, а не только code. Пенель сворачивается с любым контентом, однако
       панели внутри панелей не делаются сворачиваемыми
@@ -43,15 +44,14 @@
   const maxLines = 15;
   const minLines = 3;
 
-  let $obsrvContainer, $panels;
+  let $panels;
   const observer = new MutationObserver(mutationCallback);
 
   const timId = setInterval(function() {
     if ($('body').length === 0){ return };
     clearInterval(timId);
     new MutationObserver(function(){
-      $obsrvContainer = $('div#activitymodule div.mod-content div#issue_actions_container');
-      if ($obsrvContainer.length === 0){ return };
+      if ($('div#activitymodule div.mod-content div#issue_actions_container').length === 0){ return };
       this.disconnect();
       addNewCss();
       observerStart();
@@ -66,7 +66,7 @@
   function observerStart() {
     $panels = $('div.panel:not(.aui-button)');
     makePanels();
-    observer.observe($obsrvContainer.get(0), {childList: true})
+    observer.observe($('div.aui-item.issue-main-column').get(0), {childList: true})
   }
 
   function makePanels() {
