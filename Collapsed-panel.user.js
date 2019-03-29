@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.5
+// @version      1.5.1
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.5.1
+    Правки стилей. Выравнивание элементов
   1.5
     Теперь так же скрываются и панели, а не только code. Пенель сворачивается с любым контентом, однако
       панели внутри панелей не делаются сворачиваемыми
@@ -150,7 +152,7 @@
         padding: 3px 12px;
       }
       .cp-header-txt{
-        top: -2px;
+        top: -4px;
         position: relative;
       }
       .cp-header-img{
@@ -158,6 +160,10 @@
         transform: rotate(0deg);
         font-size: 150%;
         display: inline-block;
+        transform-origin: 4px 14px;
+        font-family: "Adgs Icons";
+        position: relative;
+        top: -5px;
       }
       .cp-pnl-content{
         padding: 0 0 0 10px;
@@ -191,14 +197,14 @@
         height: 15px;
       }
       .cp-spnl-header-img{
-        top: -8px;
+        top: -12px;
         position: relative;
         font-size: 120%;
       }
       .cp-spnl-txt{
         vertical-align: text-top;
         font-size: 11px;
-        top: -10px;
+        top: -13px;
         position: relative;
       }
       d.cp-spnl-txt-collapse:before {
