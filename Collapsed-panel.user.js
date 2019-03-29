@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.4
+// @version      1.4.1
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.4.1
+    Добавлен падинг для панелей без заголовка
   1.4
     Добавлена настройка минимального количества строк при которых
       создается заголовок для панелей без него. default 3
@@ -77,7 +79,7 @@
             <div class="cp-header-img cp-spnl-header-img">»</div><d class="cp-spnl-txt"></d></div>`).find('div.cp-spnl-header');
         $headerTxt = $pnlHeader.find('>d');
       } else{ if ($pnlHeader.hasClass('cp-header')){return} }
-      
+
       $pnlContent.addClass('cp-pnl-content');
       $preContent.height($pnlContent.height()).addClass('cp-pre-content');
       $preContent.resize(function(){$pnlContent.height($preContent.height())});
@@ -165,9 +167,11 @@
         transition: .3s;
       }
       .cp-expanded-content{
+        padding-bottom: 10px;
         transition: height .3s;
       }
       .cp-collapsed-content{
+        padding-bottom: 0;
         height: 0 !important;
         transition: height .3s;
       }
