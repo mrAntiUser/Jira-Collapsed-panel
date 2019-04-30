@@ -2,7 +2,7 @@
 // @name         Collapsed panel
 // @license      MIT
 // @namespace    argustelecom.ru
-// @version      1.5.2
+// @version      1.6
 // @description  Collapsed panel
 // @author       Andy BitOff
 // @include      *support.argustelecom.ru*
@@ -12,6 +12,8 @@
 // ==/UserScript==
 
 /* RELEASE NOTES
+  1.6
+    Баг при котором в панели появлялось пустое пространство
   1.5.2
     Правки стилей. Выравнивание элементов
     Применить скрипт после редактирования элементов
@@ -79,6 +81,7 @@
       if ($pnlBodyContent.length === 0){
         $pnlBodyContent = $pnlContent.children().detach();
         $pnlContent.append($('<div class="cp-content-for-panel"></div>')).find('div.cp-content-for-panel').append($pnlBodyContent);
+        $pnlBodyContent = $pnlContent.find('div.cp-content-for-panel');
       }
       const contentLinesCount = (($pnlBodyContent.text() || '').match(/\n/gmi) || []).length;
 
